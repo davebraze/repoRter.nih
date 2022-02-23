@@ -1,0 +1,396 @@
+---
+title: "repoRter.nih: a convenient R interface to the NIH RePORTER Project API"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{repoRter.nih: a convenient R interface to the NIH RePORTER Project API}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache.path = "cache/"
+)
+```
+
+
+```{r, echo = FALSE, message = FALSE, fig.width=6, fig.height=4, fig.align='center'}
+library(tibble)
+library(repoRter.nih)
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(scales)
+library(tufte)
+
+req <- make_req(criteria =
+                  list(covid_response = c("All")))
+
+res <- get_nih_data(req,
+                    flatten_result = TRUE)
+res %>%
+  group_by(covid_response) %>%
+  summarise(total_awards = sum(award_amount) / 1e6) %>%
+  ungroup() %>%
+  arrange(desc(covid_response)) %>%
+  mutate(prop = total_awards / sum(total_awards),
+         csum = cumsum(prop),
+         ypos = csum - prop/2 ) %>%
+  ggplot(aes(x = "", y = prop, fill = covid_response)) +
+  geom_bar(stat="identity") +
+  geom_text_repel(aes(label =
+                        paste0(dollar(total_awards,
+                                      accuracy = 1,
+                                      suffix = "M"),
+                               "\n", percent(prop, accuracy = .01)),
+                      y = ypos),
+                  show.legend = FALSE,
+                  nudge_x = .8) +
+  coord_polar(theta ="y") +
+  theme_void() +
+  ggtitle("Legislative Source for NIH Covid Response Project Funding")
+
+rm(req, res)
+
+detach("package:repoRter.nih", unload = TRUE)
+```
+
+
+# Introduction
+
+The US National Institute of Health (NIH) received approximately \$42 billion in funding fiscal year 2022; \$31 billion (72%) of this was awarded by the NIH in the form of grant funding to hospitals, medical colleges, non-profits, businesses, and other organizations based in the U.S. and abroad.^[https://nexus.od.nih.gov/all/2021/04/21/fy-2020-by-the-numbers-extramural-investments-in-research] The NIH maintains a publicly available database called "RePORTER" to track this substantial flow of grant funding and makes it available to the public via [a web-based query interface](https://reporter.nih.gov/) as well as an API.
+
+> "The NIH RePORTER APIs is designed to programmatically expose relevant scientific awards data from both NIH and non-NIH federal agencies for the consumption of project teams or external 3rd party applications to support reporting, data analysis, data integration or to satisfy other business needs as deemed pertinent." 
+>`r tufte::quote_footer('--NIH RePORTER v2 API Documentation')`
+
+This data data can have significant value for researchers, investors, industry, watchdogs/public advocates, and R users, to name a few But constructing queries and retrieving results programmatically involves some coding overhead which can be a challenge for those not familiar with RESTful APIs and JSON; it takes some effort even for those who are. The `repoRter.nih` package aims to simplify this task for the typical analyst scripting in R.
+
+# Getting Started
+
+## Installation
+
+This package (latest stable release) can be installed from CRAN the usual way:
+```{r, eval = FALSE}
+install.packages("repoRter.nih")
+```
+
+The current dev version can be installed from github, on the `dev` branch:
+```{r, eval = FALSE}
+devtools::install_github('bikeactuary/repoRter.nih@dev')
+```
+
+I welcome more capable R developers than myself to collaborate on improving the source code, documentation, and unit testing in this package.
+
+# Basic Workflow
+
+```{r, message = FALSE}
+library(repoRter.nih)
+```
+
+The `make_req()` method is used to generate a valid JSON request object. The req can subsequently be passed to the RePORTER Project API and results retrieved via the `get_nih_data()` method.
+
+Generating the request:
+```{r}
+## all projects funded by the Paycheck Protection Act, Coronavirus Response and Relief Act,
+## and American Rescue Plan, in fiscal year 2021
+req <- make_req(criteria =
+                  list(fiscal_years = 2021,
+                       covid_response = c("C4", "C5", "C6")))
+```
+
+Sending the request and retrieving results
+
+```{r, cache = TRUE}
+res <- get_nih_data(req)
+class(res)
+```
+
+A tibble is returned containing 43 columns, several of them nested `data.frame`s and lists (of variable length vectors and `data.frame`s of varying height).
+
+```{r}
+res %>% print
+```
+
+# Criteria-Field Translation
+
+A dataset (`nih_fields`) is provided with this package to assist in translating between field names used in the payload `criteria`, column names in the return data, and field names used in the `include_fields`, `exclude_fields`, and `sort_field` arguments.
+
+```{r}
+data(nih_fields)
+nih_fields %>% print
+```
+Some fields can not be used as filtering `criteria` - these will show `NA` in the `payload_name` column.
+
+# Generating Requests
+
+Most of the detail (and function documentation) is around the many parameters available in RePORTER to filter/search project records. Let's get into some of the capabilities.
+
+## Default Request
+
+If no arguments are supplied, the default behavior of `make_req()` is to generate a request for all projects funded in `fiscal_years = lubridate::year(Sys.Date())`. Limiting requests to a single year will often be necessary due to a RePORTER restriction that a maximum of 100K records may be returned from any result set - there are currently ~2.6M projects in the database going back to fiscal year 1985.
+
+```{r}
+req <- make_req()
+```
+
+The method prints a helpful message to the console in addition to returning the JSON. Set `message = FALSE` if you wish to suppress this message.
+
+## Limiting data retrieved
+
+You can limit both the width and height of the result set retrieved from the API.
+
+### Fields
+
+We probably will not need to fetch every field every time. The `include_fields` argument is provided to specify a limited set of fields to be returned. Alternatively, fields may be excluded using `exclude_fields`. 
+
+### Records (projects)
+
+This package provides the ability to retrieve just a limited number of result pages via the `max_pages` argument. This can be useful for developing/testing your queries (and for reducing time to render package documentation). Each page has a record count equal to `limit` - so setting `max_pages = 5` with the default `limit = 500` in `make_req()` will result in up to 2,500 total records returned.
+
+### Example 1 - limiting results and selecting fields
+
+```{r}
+data(nih_fields)
+fields <- nih_fields %>%
+  filter(response_name %in% 
+           c("appl_id", "subproject_id", "project_title", "fiscal_year",
+             "award_amount", "is_active", "project_start_date") ) %>%
+  pull(include_name)
+
+req <- make_req(include_fields = fields,
+                limit = 500) # default
+res <- get_nih_data(query = req,
+                    max_pages = 1)
+
+res %>% print()
+```
+
+## Some Vanilla Criteria
+
+Many criteria are passed as vectors within the `criteria` list argument. We will cover some of the most useful examples.
+
+### Ex. 2 - Organization search
+
+We can refine our query results by providing filtering criteria to `make_req()`, and by extension to the API. Suppose we want all currently active projects, funded in fiscal years 2017 through 2021, with a specific organization in mind (though we don't know exactly how its name will appear in RePORTER):
+
+```{r}
+req <- make_req(criteria = 
+                  list(
+                    fiscal_years = 2010:2011,
+                    include_active_projects = TRUE, # LIMITS to active projects
+                    org_names = c("Yale", "New Haven")
+                  ),
+                include_fields = c("Organization", "FiscalYear", "AwardAmount")
+)
+```
+
+Here we are asking for any orgs containing the strings "yale" or "new haven" (ignoring case) - there are implied wildcards on either end of the strings we provide. This is the same as `org_name LIKE '%yale%' OR org_name LIKE '%new haven%'" in a SQL WHERE clause.
+
+```{r, cache=TRUE}
+res <- get_nih_data(req, max_pages = 1)
+res %>% print()
+```
+
+Look closely at the print output and notice the column `organization` is a nested data frame - it has 17 columns and always a single record. Setting `flatten_result = TRUE` in the call to `get_nih_data()` will flatten all such return fields, prefixing the original field name and returning with clean names (see `janitor::clean_names`).
+
+```{r}
+res <- get_nih_data(req,
+                    max_pages = 1,
+                    flatten_result = TRUE)
+
+res %>%
+  print()
+```
+
+Yale is busy, but it is not the only org matching our search.
+
+```{r}
+res %>% pull(organization_org_name) %>% unique()
+```
+
+The `org_names_exact_match` criteria can be used as an alternative when we know the exact org name as it appears in RePORTER, if we want only that org's projects returned.
+
+### Ex. 3 - Geographic search
+
+We can also filter projects by the geographic location (country/state/city) of the applicant organization.
+
+```{r}
+## A valid request but probably not what we want
+req <- make_req(criteria = 
+                  list(
+                    fiscal_years = 2010:2011,
+                    include_active_projects = TRUE,
+                    org_cities = "New Haven",
+                    org_states = "WY"
+                  ),
+                include_fields = c("Organization", "FiscalYear", "AwardAmount"),
+                message = FALSE ## suppress printed message
+)
+
+res <- get_nih_data(req,
+                    max_pages = 5,
+                    flatten_result = TRUE)
+```
+
+Multiple criteria are usually connected by logical "AND" - there are no orgs based in the city of New Haven in Wyoming state (because it doesn't exist.)
+
+```{r}
+req <- make_req(criteria =
+                  list(
+                    fiscal_years = 2015,
+                    include_active_projects = TRUE,
+                    org_states = "WY"
+                  ),
+                include_fields = c("ApplId", "Organization", "FiscalYear", "AwardAmount"),
+                sort_field = "AwardAmount",
+                sort_order = "desc"
+)
+
+res <- get_nih_data(req,
+                    flatten_result = TRUE)
+
+res %>% print()
+```
+
+Why are there projects from more recent years than 2015? Because the `include_active_projects` flag adds in active projects that match all criteria aside from `fiscal_years` (this appears to be the intended behavior by RePORTER).
+
+### Ex. 3 - Coronavirus/Covid-19 research
+
+We already provided one example of this search criteria above. Let's mix it up and request all covid response projects.
+
+```{r, cache=TRUE}
+## all projects funded by the Paycheck Protection Act, Coronavirus Response and Relief Act,
+## and American Rescue Plan, in fiscal year 2021
+req <- make_req(criteria =
+                  list(covid_response = c("All")),
+                include_fields = nih_fields %>%
+                  filter(payload_name %in% c("award_amount_range", "covid_response"))
+                %>% pull(include_name))
+
+res <- get_nih_data(req)
+res$covid_response %>% class()
+res$covid_response[[1]]
+```
+
+`covid_response` is a nested list (with character vectors of variable length) within the return tibble. We can use `flatten_result = TRUE` here - elements of each vector will be collapsed to a single string with ";" as separator, converting the list to a single character vector.
+
+```{r covid, cache = TRUE}
+## all projects funded by the Paycheck Protection Act, Coronavirus Response and Relief Act,
+## and American Rescue Plan, in fiscal year 2021
+req <- make_req(criteria =
+                  list(covid_response = c("All")))
+
+res <- get_nih_data(req,
+                    flatten_result = TRUE)
+
+unique(res$covid_response)
+```
+Summarizing all Covid-related project awards:
+
+```{r, fig.width=6, fig.height=4}
+library(ggplot2)
+
+res %>%
+  group_by(covid_response) %>%
+  summarise(total_awards = sum(award_amount) / 1e6) %>%
+  ungroup() %>%
+  arrange(desc(covid_response)) %>%
+  mutate(prop = total_awards / sum(total_awards),
+         csum = cumsum(prop),
+         ypos = csum - prop/2 ) %>%
+  ggplot(aes(x = "", y = prop, fill = covid_response)) +
+  geom_bar(stat="identity") +
+  ggrepel::geom_text_repel(aes(label =
+                                 paste0(scales::dollar(total_awards,
+                                                       accuracy = 1,
+                                                       suffix = "M"),
+                                        "\n", scales::percent(prop, accuracy = .01)),
+                               y = ypos),
+                           show.legend = FALSE,
+                           nudge_x = .8) +
+  coord_polar(theta ="y") +
+  theme_void() +
+  ggtitle("Legislative Source for NIH Covid Response Project Funding")
+```
+
+A second dataset is provided to translate the `covid_response` codes:
+
+```{r}
+data(covid_response_codes)
+covid_response_codes %>% print
+```
+
+# Some Rocky Road Criteria
+
+Other criteria provide search and filtering capability on many of the nested data elements. These criteria are passed as lists and must include a value for each of the named elements within.
+
+### Example 4 - Principal Investigator/Officer name search
+
+The `pi_names` and `po_names` criteria allow the user to search for projects based on the first and last names of Principal Investigators and Principal Officers assigned. Each of these criteria must be provided as a list with 3 named character vector elements: `first_name`, `last_name`, and `any_name`. *Even if you only want to search on one of these name fields, you must provide the remaining elements as an empty string.* We will demonstrate with a search on PI name.
+
+```{r}
+## projects funded in 2021 where the principal investigator first name
+##  is "Michael" or begins with "Jo"
+req <- make_req(criteria = 
+                  list(fiscal_years = 2021,
+                       pi_names = list(first_name = c("Michael", "Jo*"),
+                                       last_name = c(""), # must specify all pi_names elements always
+                                       any_name = character(1))),
+                include_fields = nih_fields %>%
+                  filter(payload_name == "pi_names") %>%
+                  pull(include_name),
+                message = FALSE)
+
+res <- get_nih_data(req,
+                    max_pages = 1,
+                    flatten_result = TRUE)
+
+res %>% print
+```
+
+Here we searched for any projects with a PI first-named "Michael" or beginning with "Jo" - the "*" is a wildcard operator.
+
+Note that the first column in the return is a list of data frames of *variable height* - we leave such returned elements to the user to handle extraction - flattening is only done for lists of atomic vectors and nested data frames.
+
+### Ex. 5 - Advanced text search
+
+RePORTER allows users to search the project title, abstract, and tags for specific terms or phrases. You can access this capability with the `advanced_text_search` criteria - a named list with 3 elements.
+
+- `operator` may be either "and", "or", or "advanced" - and/or will specify the logical operator connecting multiple search terms. "advanced" allows the user to pass a boolean search string directly.
+- `search_field` can be any or multiple of "terms", "abstract", "projecttitle." To search all items, specify "all" or "" (a length 1 vector with an empty string).
+
+```{r}
+## using advanced_text_search with boolean search string
+req <- make_req(criteria = 
+                  list(advanced_text_search =
+                         list(operator = "advanced",
+                              search_field = c("terms", "abstract"),
+                              search_text =  "(head AND trauma) OR \"brain damage\" AND NOT \"psychological\"" )),
+                include_fields = c("ProjectTitle", "AbstractText", "Terms")  )
+
+res <- get_nih_data(req, max_pages = 1)
+
+res %>% head %>% print
+```
+
+# Additional Resources
+
+- In addition to this vignette and function documentation, the [RePORTER web interface](https://reporter.nih.gov/advanced-search) is another useful resource for getting familiar with available search parameters
+
+- The official API documentation is located [here](https://api.reporter.nih.gov/documents/Data%20Elements%20for%20RePORTER%20Project%20API%20v2.pdf)...
+
+- ...and the homepage with further examples/documentation is [here](https://api.reporter.nih.gov/)
+
+- Information on NIH study sections, IRGs, etc. is [here](https://public.csr.nih.gov/StudySections)
+
+- h/t to Chris whose [code on github](https://github.com/christopherBelter/nih_reporter_api) I found and served as a starting point for this work
+
+## Session Information
+
+The version number of R and packages loaded for generating the vignette were:
+
+```{r}
+sessionInfo()
+```

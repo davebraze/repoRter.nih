@@ -14,8 +14,8 @@ nih_fields[nih_fields == ""] <- NA
 
 ## I notice some payload terms return multiple fields - need to restructure this mapping 1-to-many
 
-save(nih_fields, file = "data/nih_fields.RData")
-
+save(nih_fields, file = "data/nih_fields.rda")
+# load("data/nih_fields.RData")
 covid_response_codes <- tibble(covid_response = c("Reg-CV", "CV", "C3", "C4", "C5", "C6"),
                                funding_source = c("NIH regular appropriations funding", 
                                                   "Coronavirus Preparedness and Response Supplemental Appropriations Act, 2020",
@@ -23,4 +23,5 @@ covid_response_codes <- tibble(covid_response = c("Reg-CV", "CV", "C3", "C4", "C
                                                   "Paycheck Protection Program and Health Care Enhancement Act, 2020",
                                                   "Coronavirus Response and Relief Supplemental Appropriations Act, 2021",
                                                   "American Rescue Plan Act of 2021" ) )
-save(covid_response_codes, file = "data/covid_response_codes.RData")
+save(covid_response_codes, file = "data/covid_response_codes.rda")
+# load("data/covid_response_codes.RData")

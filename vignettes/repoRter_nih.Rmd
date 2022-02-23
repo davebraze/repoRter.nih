@@ -118,7 +118,7 @@ res %>% print
 A dataset (`nih_fields`) is provided with this package to assist in translating between field names used in the payload `criteria`, column names in the return data, and field names used in the `include_fields`, `exclude_fields`, and `sort_field` arguments.
 
 ```{r}
-data(nih_fields)
+data("nih_fields")
 nih_fields %>% print
 ```
 Some fields can not be used as filtering `criteria` - these will show `NA` in the `payload_name` column.
@@ -152,11 +152,11 @@ This package provides the ability to retrieve just a limited number of result pa
 ### Example 1 - limiting results and selecting fields
 
 ```{r}
-data(nih_fields)
+data("nih_fields")
 fields <- nih_fields %>%
   filter(response_name %in% 
            c("appl_id", "subproject_id", "project_title", "fiscal_year",
-             "award_amount", "is_active", "project_start_date") ) %>%
+             "award_amount", "is_active", "project_start_date")) %>%
   pull(include_name)
 
 req <- make_req(include_fields = fields,
@@ -318,7 +318,7 @@ res %>%
 A second dataset is provided to translate the `covid_response` codes:
 
 ```{r}
-data(covid_response_codes)
+data("covid_response_codes")
 covid_response_codes %>% print
 ```
 

@@ -74,7 +74,7 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
     }
   )
   
-  if(res$status_code != 200) {
+  if (res$status_code != 200) {
     stop("API Error: received non-200 response")
   }
   
@@ -82,7 +82,7 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
     fromJSON()
   meta <- res$meta
   
-  if(meta$total == 0) {
+  if (meta$total == 0) {
     message(green("Done - 0 records returned. Try a different search criteria."))
     return(NA)
   } 
@@ -92,8 +92,8 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
   
   page_count <- ceiling(meta$total / limit)
   
-  if(!is.null(max_pages)) {
-    if(max_pages >= page_count) {
+  if (!is.null(max_pages)) {
+    if (max_pages >= page_count) {
       message(paste0("max_pages set to ", max_pages, " by user, but result set only contains ", page_count, " pages.  Retrieving the full result set..."))
     } else if (max_pages < page_count) {
       message(paste0("max_pages set to ", max_pages, " by user. Result set contains ", page_count, " pages. Only partial results will be retrieved."))
@@ -103,7 +103,7 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
     iters <- page_count
   }
   
-  if(iters > 1) {
+  if (iters > 1) {
     Sys.sleep(1)
     for (i in 2:iters) {
       new_offset <- (i-1)*limit
@@ -116,7 +116,7 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
                    content_type_json(),
                    body = query)
       
-      if(res$status_code != 200) {
+      if (res$status_code != 200) {
         message(paste0("API request failed for page #", i, ". Skipping to next page."))
         next
       }
@@ -137,7 +137,7 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
   df <- bind_rows(pages)
   ret <- as_tibble(df)
   
-  if(flatten_result) {
+  if (flatten_result) {
     # flatten nested data frames (not lists of data frames)
     ret %<>% 
       flatten() %>%
@@ -147,11 +147,11 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
     # flatten lists of vectors
     ret %<>% 
       mutate(across(, function(x) {
-        if(is.list(x) && is.vector(x[[1]]) && is.atomic(x[[1]]) ) {
+        if (is.list(x) && is.vector(x[[1]]) && is.atomic(x[[1]])) {
           sapply(x, function(y) paste0(y, collapse = ";")) %>%
             return()
         } else { return(x) }
-      }) )
+      }))
   }
   
   ret %>%

@@ -244,7 +244,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                      sort_order = NULL,
                      message = TRUE) {
   
-  if(is.null(criteria) ) criteria <- list() 
+  if (is.null(criteria)) criteria <- list() 
   
   ## fill req w/ default values for these criteria to be explicit
   ## is_agency_admin --> this currently has no effect on results 
@@ -253,14 +253,14 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
   boolys <- c("use_relevance", "include_active_projects", "exclude_subprojects", "multi_pi_only",
               "newly_added_projects_only", "sub_project_only")
   
-  for(i in 1:length(boolys)) {
+  for (i in 1:length(boolys)) {
     ## all of these values will be set to API defaults determined through testing result when unspecified
-    if( !(boolys[i] %in% names(criteria)) ) {
+    if (!(boolys[i] %in% names(criteria))) {
       criteria[[boolys[i]]] <- FALSE
     }
   }
   
-  if(!is.null(criteria$pi_names)) {
+  if (!is.null(criteria$pi_names)) {
     ## assert three named character vectors in list
     assert_that(is.list(criteria$pi_names),
                 has_name(criteria$pi_names, "any_name"),
@@ -268,7 +268,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 has_name(criteria$pi_names, "last_name"),
                 is.character(criteria$pi_names$any_name),
                 is.character(criteria$pi_names$first_name),
-                is.character(criteria$pi_names$last_name) )
+                is.character(criteria$pi_names$last_name))
     
     pi_names_reformat <- list()
     
@@ -278,13 +278,13 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     }
     
     start <- length(pi_names_reformat)
-    for(j in 1:length(criteria$pi_names$first_name)) {
+    for (j in 1:length(criteria$pi_names$first_name)) {
       pi_names_reformat[[start+j]] <- data.frame(first_name = criteria$pi_names$first_name[j]) %>%
         unbox()
     }
     
     start <- length(pi_names_reformat)
-    for(k in 1:length(criteria$pi_names$last_name)) {
+    for (k in 1:length(criteria$pi_names$last_name)) {
       pi_names_reformat[[start+k]] <- data.frame(last_name = criteria$pi_names$last_name[k]) %>%
         unbox()
     }
@@ -292,7 +292,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     criteria$pi_names <- pi_names_reformat
   }
   
-  if(!is.null(criteria$po_names)) {
+  if (!is.null(criteria$po_names)) {
     ## asserrt three named character vectors in list
     assert_that(is.list(criteria$po_names),
                 has_name(criteria$po_names, "any_name"),
@@ -300,7 +300,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 has_name(criteria$po_names, "last_name"),
                 is.character(criteria$po_names$any_name),
                 is.character(criteria$po_names$first_name),
-                is.character(criteria$po_names$last_name) )
+                is.character(criteria$po_names$last_name))
     
     po_names_reformat <- list()
     
@@ -310,20 +310,20 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     }
     
     start <- length(po_names_reformat)
-    for(j in 1:length(criteria$po_names$first_name)) {
+    for (j in 1:length(criteria$po_names$first_name)) {
       po_names_reformat[[start+j]] <- data.frame(first_name = criteria$po_names$first_name[j]) %>%
         unbox()
     }
     
     start <- length(po_names_reformat)
-    for(k in 1:length(criteria$po_names$last_name)) {
+    for (k in 1:length(criteria$po_names$last_name)) {
       po_names_reformat[[start+k]] <- data.frame(last_name = criteria$po_names$last_name[k]) %>%
         unbox()
     }
     criteria$po_names <- po_names_reformat
   }
   
-  if(!is.null(criteria$project_num_split)) {
+  if (!is.null(criteria$project_num_split)) {
     ## asserrt 6 named character vectors in list
     assert_that(is.list(criteria$project_num_split),
                 has_name(criteria$project_num_split, "appl_type_code"),
@@ -337,10 +337,10 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 is.character(criteria$project_num_split$ic_code),
                 is.character(criteria$project_num_split$serial_num),
                 is.character(criteria$project_num_split$support_year),
-                is.character(criteria$project_num_split$suffix_code) )
+                is.character(criteria$project_num_split$suffix_code))
   }
   
-  if(!is.null(criteria$spending_categories)) {
+  if (!is.null(criteria$spending_categories)) {
     ## asserrt two named vectors in list
     assert_that(is.list(criteria$spending_categories),
                 length(criteria$spending_categories) == 2,
@@ -351,17 +351,17 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 length(criteria$spending_categories$match_all) == 1 )
   }
   
-  if(!is.null(criteria$project_start_date)) {
+  if (!is.null(criteria$project_start_date)) {
     ## asserrt two named vectors in list
     assert_that(is.list(criteria$project_start_date),
                 length(criteria$project_start_date) == 2,
                 has_name(criteria$project_start_date, "from_date"),
                 has_name(criteria$project_start_date, "to_date"),
                 is.date(criteria$project_start_date$from_date),
-                is.date(criteria$project_start_date$to_date) )
+                is.date(criteria$project_start_date$to_date))
   }
   
-  if(!is.null(criteria$project_end_date)) {
+  if (!is.null(criteria$project_end_date)) {
     ## asserrt two named dates in list
     assert_that(is.list(criteria$project_end_date),
                 length(criteria$project_end_date) == 2,
@@ -374,7 +374,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
   }
   
   
-  if(!is.null(criteria$full_study_sections) ) {
+  if (!is.null(criteria$full_study_sections)) {
     assert_that(is.list(criteria$full_study_sections),
                 length(criteria$full_study_sections) == 6,
                 has_name(criteria$full_study_sections, "irg_code"),
@@ -388,10 +388,10 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 is.character(criteria$full_study_sections$sra_flex_code),
                 is.character(criteria$full_study_sections$group_code),
                 is.character(criteria$full_study_sections$name),
-                is.character(criteria$full_study_sections$url) )
+                is.character(criteria$full_study_sections$url))
   }
   
-  if(!is.null(criteria$award)) {
+  if (!is.null(criteria$award)) {
     
     assert_that(is.list(criteria$award),
                 length(criteria$award) == 3,
@@ -405,7 +405,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                 has_name(criteria$award$award_amount_range, "min_amount"),
                 has_name(criteria$award$award_amount_range, "max_amount"),
                 is.numeric(criteria$award$award_amount_range$min_amount),
-                is.number(criteria$award$award_amount_range$max_amount) )
+                is.number(criteria$award$award_amount_range$max_amount))
     
     criteria$award$award_notice_date <- unbox(criteria$award$award_notice_date)
     criteria$award$award_notice_opr <- unbox(criteria$award$award_notice_opr)
@@ -413,7 +413,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     criteria$award$award_amount_range$min_amount <- unbox(criteria$award$award_amount_range$min_amount)
   }
   
-  if(!is.null(criteria$advanced_text_search)) {
+  if (!is.null(criteria$advanced_text_search)) {
     # all(criteria$advanced_text_search$search_field %in% c("projecttitle", "abstract", "terms")) %>% print
     
     assert_that(is.list(criteria$advanced_text_search),
@@ -446,12 +446,12 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
   )
   
   nms <- names(criteria)
-  for(i in 1:length(nms)) {
+  for (i in 1:length(nms)) {
     if (nms[i] %in% unbox_elements) criteria[[nms[i]]] <- unbox(criteria[[i]])
   }
   
   the_req <- list(
-    criteria = criteria %>% 
+    criteria = criteria %>%
       discard(is.null),
     include_fields = include_fields,
     exclude_fields = exclude_fields,
@@ -462,7 +462,7 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
   ) %>% 
     discard(is.null)
   
-  if((is.logical(message) & length(message) == 1 & message)) {
+  if (is.logical(message) & length(message) == 1 & message) {
     message(paste0("This is your JSON payload:\n\n", the_req %>% toJSON %>% green(),
                    "\n\nIf you receive a non-200 API response, compare this formatting (boxes, braces, quotes, etc.) to the 'Complete Payload' schema provided here:\n",
                    underline("https://api.reporter.nih.gov/?urls.primaryName=V2.0#/Search/post_v2_projects_search")))

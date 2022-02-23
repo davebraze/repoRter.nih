@@ -1,22 +1,44 @@
 ---
 title: "repoRter.nih: a convenient R interface to the NIH RePORTER Project API"
-output: pdf_document
+author:
+- Michael Barr, ACAS, MAAA, CPCU
+classoption: hyperref,
+output: 
+  pdf_document: 
+    keep_md: yes
+    keep_tex: yes
+    latex_engine: xelatex
+    pandoc_args: --listings
+  html_document:
+    highlight: tango
+    theme: flatly
+header-includes:
+- \UseRawInputEncoding
+- \usepackage{xcolor}
+- \lstset{ backgroundcolor=\color[RGB]{248,248,248}, basewidth=0.5em, basicstyle=\small\ttfamily,
+  breakatwhitespace=true, breakautoindent=true, breaklines=true, captionpos=b, columns=flexible,
+  commentstyle=\color[rgb]{0.56,0.35,0.01}\itshape, escapeinside={\%*}{*)}, frame=tb,
+  keepspaces=true, keywordstyle=\color[rgb]{0.13,0.29,0.53}\bfseries, linewidth=\textwidth,
+  numberstyle=\footnotesize, showspaces=false, showstringspaces=false, showtabs=false,
+  stringstyle=\color[rgb]{0.31,0.60,0.02}, tabsize=2, }
 vignette: >
   %\VignetteIndexEntry{repoRter.nih: a convenient R interface to the NIH RePORTER Project API}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
+  width = 68,
   cache.path = "cache/"
 )
+
+options(width = 68, cli.unicode = FALSE, cli.width = 68)
 ```
 
 
-```{r, echo = FALSE, message = FALSE, fig.width=6, fig.height=4, fig.align='center'}
+```{r, echo = FALSE, message = FALSE, fig.width=6, fig.height=4, fig.align='center', cache=TRUE}
 library(tibble)
 library(repoRter.nih)
 library(ggplot2)
@@ -93,8 +115,8 @@ The `make_req()` method is used to generate a valid JSON request object. The req
 
 Generating the request:
 ```{r}
-## all projects funded by the Paycheck Protection Act, Coronavirus Response and Relief Act,
-## and American Rescue Plan, in fiscal year 2021
+# all projects funded by the Paycheck Protection Act, Coronavirus Response and
+# Relief Act, and American Rescue Plan, in fiscal year 2021
 req <- make_req(criteria =
                   list(fiscal_years = 2021,
                        covid_response = c("C4", "C5", "C6")))
@@ -160,7 +182,8 @@ fields <- nih_fields %>%
   pull(include_name)
 
 req <- make_req(include_fields = fields,
-                limit = 500) # default
+                limit = 500,
+                message = FALSE) # default
 res <- get_nih_data(query = req,
                     max_pages = 1)
 
@@ -182,8 +205,8 @@ req <- make_req(criteria =
                     include_active_projects = TRUE, # LIMITS to active projects
                     org_names = c("Yale", "New Haven")
                   ),
-                include_fields = c("Organization", "FiscalYear", "AwardAmount")
-)
+                include_fields = c("Organization", "FiscalYear", "AwardAmount"),
+                message = FALSE)
 ```
 
 Here we are asking for any orgs containing the strings "yale" or "new haven" (ignoring case) - there are implied wildcards on either end of the strings we provide. This is the same as `org_name LIKE '%yale%' OR org_name LIKE '%new haven%'" in a SQL WHERE clause.
@@ -216,7 +239,7 @@ The `org_names_exact_match` criteria can be used as an alternative when we know 
 
 We can also filter projects by the geographic location (country/state/city) of the applicant organization.
 
-```{r}
+```{r, cache=TRUE}
 ## A valid request but probably not what we want
 req <- make_req(criteria = 
                   list(
@@ -245,8 +268,8 @@ req <- make_req(criteria =
                   ),
                 include_fields = c("ApplId", "Organization", "FiscalYear", "AwardAmount"),
                 sort_field = "AwardAmount",
-                sort_order = "desc"
-)
+                sort_order = "desc",
+                message = FALSE)
 
 res <- get_nih_data(req,
                     flatten_result = TRUE)
@@ -287,6 +310,7 @@ res <- get_nih_data(req,
 
 unique(res$covid_response)
 ```
+
 Summarizing all Covid-related project awards:
 
 ```{r, fig.width=6, fig.height=4}
@@ -328,7 +352,7 @@ Other criteria provide search and filtering capability on many of the nested dat
 
 ### Example 4 - Principal Investigator/Officer name search
 
-The `pi_names` and `po_names` criteria allow the user to search for projects based on the first and last names of Principal Investigators and Principal Officers assigned. Each of these criteria must be provided as a list with 3 named character vector elements: `first_name`, `last_name`, and `any_name`. *Even if you only want to search on one of these name fields, you must provide the remaining elements as an empty string.* We will demonstrate with a search on PI name.
+The `pi_names` and `po_names` criteria allow the user to search for projects based on the first and last names of Principal Investigators and Principal Officers assigned. Each of these criteria must be provided as a list with 3 named character vector elements: `first_name`, `last_name`, and `any_name`. _Even if you only want to search on one of these name fields, you must provide the remaining elements as an empty string._ We will demonstrate with a search on PI name.
 
 ```{r}
 ## projects funded in 2021 where the principal investigator first name
@@ -352,7 +376,7 @@ res %>% print
 
 Here we searched for any projects with a PI first-named "Michael" or beginning with "Jo" - the "*" is a wildcard operator.
 
-Note that the first column in the return is a list of data frames of *variable height* - we leave such returned elements to the user to handle extraction - flattening is only done for lists of atomic vectors and nested data frames.
+Note that the first column in the return is a list of data frames of _variable height_ - we leave such returned elements to the user to handle extraction - flattening is only done for lists of atomic vectors and nested data frames.
 
 ### Ex. 5 - Advanced text search
 
@@ -372,7 +396,7 @@ req <- make_req(criteria =
 
 res <- get_nih_data(req, max_pages = 1)
 
-res %>% head %>% print
+res %>% slice(4) %>% mutate(abstract_text = gsub("\\n", " ", abstract_text)) %>% print
 ```
 
 # Additional Resources
@@ -387,7 +411,7 @@ res %>% head %>% print
 
 - h/t to Chris whose [code on github](https://github.com/christopherBelter/nih_reporter_api) I found and served as a starting point for this work
 
-## Session Information
+# Session Information
 
 The version number of R and packages loaded for generating the vignette were:
 

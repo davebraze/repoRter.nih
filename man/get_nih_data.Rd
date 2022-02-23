@@ -7,7 +7,7 @@
 get_nih_data(query, max_pages = NULL, flatten_result = FALSE)
 }
 \arguments{
-\item{query}{A valid json request formatted for the RePORTER Project API, as returned by the \code{make_req()} method}
+\item{query}{A valid json request formatted for the RePORTER Project API, as returned by the \code{\link{make_req}} method}
 
 \item{max_pages}{numeric(1); default: NULL; An integer specifying to only fetch (up to) the first \code{max_pages} number of pages from the result set.
 Useful for testing your query/obtaining schema information. Default behavior is to fetch all pages.}

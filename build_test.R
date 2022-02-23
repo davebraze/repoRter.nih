@@ -29,6 +29,13 @@ results <- rhub::check_for_cran()
 # Get the summary of your results
 results$cran_summary()
 
+rhub::check(
+  env_vars = c(
+    "_R_CHECK_CRAN_INCOMING_REMOTE_" = "true", 
+    "_R_CHECK_CRAN_INCOMING_" = "true"
+  )
+)
+
 # Generate your cran-comments.md, then you copy-paste the output from the function above
 usethis::use_cran_comments()
 
@@ -42,4 +49,5 @@ library(inteRgrate)
 check_lintr() # lots to fix
 check_tidy_description()
 check_gitignore()
+
 

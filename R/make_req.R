@@ -19,7 +19,7 @@
 #'     suppress this at times.
 #' 
 #' @return A standard json (\code{jsonlite} flavor) object containing the valid JSON request string which can
-#'     be passed to \code{get_nih_data()} or elsewhere
+#'     be passed to \code{\link{get_nih_data}} or elsewhere
 #' 
 #' @details
 #' 
@@ -35,17 +35,16 @@
 #'           varying them by the sort order on some field (and taking care to avoid or remove overlap).
 #'           See the \code{sort_field} and \code{sort_order} arguments.}
 #' }
-#' 
+#' \cr
 #' \code{criteria} must be specified as a list and may include any of the following (all optional) top level elements:
 #' \itemize{
 #'   \item{\code{use_relevance}: logical(1); if TRUE (default), it will sort the most closely matching records per the search
 #'         criteria to the top (i.e. the NHI sorts descending according to a calculated match score)}
 #'   \item{\code{fiscal_years}: numeric(); one or more fiscal years to retrieve projects that correspond to (or started in)
 #'         one of the fiscal years entered}
-#'   \item{\code{include_active_projects}: logical(1); if TRUE (default), LIMIT TO active projects (Note: RePORTER docs and
-#'         the name itself suggest that this would add in active projects - misleading)}
+#'   \item{\code{include_active_projects}: logical(1); if TRUE (default), adds in active projects without regard for \code{policy_years}}
 #'   \item{\code{pi_names}: list(); API will return records with Project Investigators (PIs) wildcard-matching any of the strings
-#'         requested.\cr\cr
+#'         requested.\cr
 #'         If provided, the list must contain three named character vector elements: \code{first_name}, \code{last_name},
 #'         \code{any_name}. Each vector must contain at least one element - use a length-1 vector with an empty string (\code{= ""}
 #'         or \code{= character(1)}) for any name field you do not wish to search on.}
@@ -64,9 +63,8 @@
 #'         any of the specified strings. You may include explicit wildcard operators ("*") in the strings, e.g. "5UG1HD078437-\*" }
 #'   \item{\code{project_num_split}: list(6); the \code{project_nums} can be broken down to meaningful components which can be searched
 #'         individually using this argument.
-#'               These component codes are defined here: \cr
-#'               \url{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=31}\cr\cr
-#'               Your list must contain all of the following named elements:\cr
+#'               These component codes are defined \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=31}{here}
+#'               Your list must contain all of the following named elements:
 #'               \itemize{
 #'                   \item{\code{appl_type_code}: character(); }
 #'                   \item{\code{activity_code}: character(); }
@@ -74,53 +72,46 @@
 #'                   \item{\code{serial_num}: character(); }
 #'                   \item{\code{support_year}: character(); }
 #'                   \item{\code{suffix_code}: character(); }
-#'               } \cr
+#'               }
 #'               Provide a length-1 vector containing an empty string (\code{=""} or \code{=character(1)}) for any element you do not want to search on
 #'       }
-#'   \item{\code{spending_categories}: list(2); a list containing the following named elements:\cr
+#'   \item{\code{spending_categories}: list(2); a list containing the following named elements:
 #'                \itemize{
-#'                    \item{\code{values}: numeric(): the NIH spending category code. These are congressionally defined and are available here:\cr
-#'                          \url{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=40}
+#'                    \item{\code{values}: numeric(): the NIH spending category code. These are congressionally defined and are
+#'                          available \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=40}{here}
 #'                         }
 #'                    \item{\code{match_all}: logical(1); TRUE to return projects found in all categories; FALSE to return projects matching any one
 #'                          of the categories.}
 #'                }
 #'        }
-#'   \item{\code{funding_mechanism}: character(); one or more NIH funding mechanism codes used in the president's budget. Available here:\cr
-#'         \url{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=14}
-#'         }
+#'   \item{\code{funding_mechanism}: character(); one or more NIH funding mechanism codes used in the president's budget.
+#'         Available \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf#page=14}{here}}
 #'   \item{\code{org_countries}: character(); one or more country names; e.g. "United States"}
 #'   \item{\code{appl_ids}: numeric(); one or more application IDs (note: appl. IDs are natural numbers, unlike \code{project_nums})}
-#'   \item{\code{agencies}: character(); one or more of the abbreviated NIH agency/institute/center names, available here:\cr
-#'        \url{https://grants.nih.gov/grants/acronym_list.htm#ao_two}
-#'        }
+#'   \item{\code{agencies}: character(); one or more of the abbreviated NIH agency/institute/center names, available
+#'        \href{https://grants.nih.gov/grants/acronym_list.htm#ao_two}{here}}
 #'   \item{\code{is_agency_admin: logical(1)}; when specifying associated \code{agencies}, set this value to \code{TRUE} to further specify
-#'         that these agencies are administering the grant/project. }
+#'         that these agencies are administering the grant/project.}
 #'   \item{\code{is_agency_funding: logical(1)}; when specifying associated \code{agencies}, set this value to \code{TRUE} to further specify
 #'         that these agencies are funding the grant/project. }
 #'   \item{\code{activity_codes: character()}; a 3-character code identifying the grant, contract, or intramural activity through which a project is supported.
-#'         This is a more detailed description within each funding mechanism. Codes are available here:\cr
-#'         \url{https://grants.nih.gov/grants/funding/ac_search_results.htm}
-#'         }
-#'   \item{\code{award_types: character()}; (aka Type of Application) one or more grant/application type codes numbered 1-9. See types here:\cr
-#'        \url{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/type-of-applications.htm}
-#'        }
-#'   \item{\code{dept_types: character()}; one or more of NIH standardized department type names (e.g. "PEDIATRICS"). Valid names are provided here:\cr
-#'   \url{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants/}
-#'   }
-#'   \item{\code{cong_dists: character()}; one or more US congressional districts (e.g. "NY-20") which the project can be associated with. See here:\cr
-#'   \url{https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts}
-#'   }
-#'   \item{\code{foa: character()}; one or more FOA (Funding Opportunity Announcements). Multiple projects may be tied to a single FOA. See here:\cr
-#'   \url{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/understand-funding-opportunities.htm}
-#'   }
-#'   \item{\code{project_start_date}: list(2); provide a range for the project start date. Must pass as list containing the following named elements:\cr
+#'         This is a more detailed description within each funding mechanism. Codes are available
+#'         \href{https://grants.nih.gov/grants/funding/ac_search_results.htm}{here}}
+#'   \item{\code{award_types: character()}; (aka Type of Application) one or more grant/application type codes numbered 1-9.
+#'         See types \href{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/type-of-applications.htm}{here}}
+#'   \item{\code{dept_types: character()}; one or more of NIH standardized department type names (e.g. "PEDIATRICS"). Valid names are provided
+#'         \href{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants}{here}}
+#'   \item{\code{cong_dists: character()}; one or more US congressional districts (e.g. "NY-20") which the project can be associated with.
+#'         See \href{https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts}{here}}
+#'   \item{\code{foa: character()}; one or more FOA (Funding Opportunity Announcements). Multiple projects may be tied to a single FOA.
+#'   See \href{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/understand-funding-opportunities.htm}{here}}
+#'   \item{\code{project_start_date}: list(2); provide a range for the project start date. Must pass as list containing the following named elements:
 #'                \itemize{
 #'                    \item{\code{from_date}: date(1); }
 #'                    \item{\code{to_date}: date(1); }
 #'                }
 #'        }
-#'   \item{\code{project_end_date: list(2)}; provide a range for the project end date - similar to \code{project_start_date}.\cr
+#'   \item{\code{project_end_date: list(2)}; provide a range for the project end date - similar to \code{project_start_date}.
 #'                \itemize{
 #'                    \item{\code{from_date}: date(1); }
 #'                    \item{\code{to_date}: date(1); }
@@ -135,7 +126,7 @@
 #'   \item{\code{newly_added_projects_only: logical(1)}; default: FALSE; return only those projects "newly added" (this is left undefined in the official
 #'         documentation) to the system.}
 #'   \item{\code{covid_response: character();} one or more special selector codes used to return projects awarded to study COVID-19 and related topics as funded
-#'         and classified according to the below valid values/funding sources:\cr
+#'         and classified according to the below valid values/funding sources:
 #'        \itemize{
 #'           \item{\code{All}: all COVID-19 projects}
 #'           \item{\code{Reg-CV}: those funded by regular NIH Appropriated funds}
@@ -149,9 +140,8 @@
 #'   \item{\code{full_study_sections: list(6)}; (not documented in API notes) Review activities of the Center for Scientific Review (CSR) are organized into
 #'         Integrated Review Groups (IRGs). Each IRG represents a cluster of study sections around a general scientific area. Applications generally are assigned
 #'         first to an IRG, and then to a specific study section within that IRG for evaluation of scientific merit.\cr
-#'               This all becomes a bit complicated so we provide this link without further comment:\cr\cr
-#'               \url{https://public.csr.nih.gov/StudySections}\cr\cr
-#'               If providing this criteria, you must include each of the below named elements as character vectors:
+#'         This gets a bit complicated so we provide \href{https://public.csr.nih.gov/StudySections}{this resource} for further reading.
+#'         If providing this criteria, you must include each of the below named elements as character vectors:
 #'        \itemize{
 #'                   \item{\code{irg_code}: character(); Integrated Review Group}
 #'                   \item{\code{sra_designator_code}: character(); Scientific Review Administrator }
@@ -162,7 +152,7 @@
 #'               }
 #'        }
 #'   \item{\code{advanced_text_search}: list(3); used to perform string search in the Project Title ("projecttitle"),
-#'         Abstract ("abstract"), and/or Project Terms ("terms") fields.\cr\cr
+#'         Abstract ("abstract"), and/or Project Terms ("terms") fields.
 #'         If providing this criteria, you must include each of the below named elements:
 #'         \itemize{
 #'                \item{\code{operator: character(1)}; one of "and", "or", "advanced". "and", "or" will be the logical operator between all provided search terms.
@@ -177,8 +167,8 @@
 #' }
 #' 
 #' \subsection{Field Names}{
-#'     Full listing of available field names which can be specified in \code{include_fields}, \code{exclude_fields}, and \code{sort_field}:
-#'     \url{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}.
+#'     Full listing of available field names which can be specified in \code{include_fields}, \code{exclude_fields}, and \code{sort_field}
+#'     is located \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}{here}
 #' }
 #' 
 #' @keywords covid-19, coronavirus, NIH, research, grant, funding, federal, api
@@ -243,6 +233,8 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                      sort_field = NULL,
                      sort_order = NULL,
                      message = TRUE) {
+  
+  options(width = 300)
   
   if (is.null(criteria)) criteria <- list() 
   
@@ -463,8 +455,8 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     discard(is.null)
   
   if (is.logical(message) & length(message) == 1 & message) {
-    message(paste0("This is your JSON payload:\n\n", the_req %>% toJSON %>% green(),
-                   "\n\nIf you receive a non-200 API response, compare this formatting (boxes, braces, quotes, etc.) to the 'Complete Payload' schema provided here:\n",
+    message(paste0("This is your JSON payload:", "\n", the_req %>% toJSON %>% green(),
+                   "\n", "\n", "If you receive a non-200 API response, compare this formatting (boxes, braces, quotes, etc.) to the 'Complete Payload' schema provided here:\n",
                    underline("https://api.reporter.nih.gov/?urls.primaryName=V2.0#/Search/post_v2_projects_search")))
   }
   

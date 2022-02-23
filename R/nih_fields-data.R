@@ -18,9 +18,9 @@
 #'       The tibble contains nested data frames and lists of variable length vectors.} 
 #' }
 #' 
-#' Note: when \code{flatten_result = TRUE}, the original field name will prefix the names of the new flattened columns. See: \code{?jsonlite::flatten}.
+#' Note: when \code{flatten_result = TRUE}, the original field name will prefix the names of the new flattened columns. See: \code{\link{jsonlite::flatten}}.
 #' 
-#' @references \href{NIH RePORTER API Documentation}{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}
+#' @references \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}{NIH RePORTER API Documentation}
 #'     
 #' @keywords datasets covid-19 coronavirus NIH research grant funding federal api
 "nih_fields"

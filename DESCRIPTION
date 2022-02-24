@@ -4,7 +4,7 @@ Title: R Interface to the NIH RePORTER Project API
 Version: 0.1.0
 Authors@R: 
     person(given = "Michael",
-           family = "Barr, ACAS, MAAA",
+           family = "Barr, ACAS, MAAA, CPCU",
            role = c("cre", "aut"),
            email = "mike@bikeactuary.com")
 Description: Methods to easily build requests in the non-standard JSON

@@ -123,7 +123,7 @@ The maximum number of records that can be returned from any result set is 100,00
   \item{\code{award_types: character()}; (aka Type of Application) one or more grant/application type codes numbered 1-9.
         See types \href{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/type-of-applications.htm}{here}}
   \item{\code{dept_types: character()}; one or more of NIH standardized department type names (e.g. "PEDIATRICS"). Valid names are provided
-        \href{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants}{here}}
+        \href{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants/}{here}}
   \item{\code{cong_dists: character()}; one or more US congressional districts (e.g. "NY-20") which the project can be associated with.
         See \href{https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts}{here}}
   \item{\code{foa: character()}; one or more FOA (Funding Opportunity Announcements). Multiple projects may be tied to a single FOA.

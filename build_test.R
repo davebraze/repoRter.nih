@@ -25,7 +25,6 @@ results <- rhub::check_for_cran()
 # Get the summary of your results
 results$cran_summary()
 
-
 # Generate your cran-comments.md, then you copy-paste the output from the function above
 usethis::use_cran_comments()
 

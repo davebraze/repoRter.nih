@@ -55,7 +55,6 @@ req <- make_req(criteria =
 
 res <- get_nih_data(req,
                     flatten_result = TRUE)
-message("plot 1")
 
 p <- res %>%
   left_join(covid_response_codes, by = "covid_response") %>%
@@ -87,7 +86,7 @@ p <- res %>%
 
 rm(req, res)
 detach("package:repoRter.nih", unload = TRUE)
-message("past the plot")
+
 p
 ```
 
@@ -327,8 +326,6 @@ Summarizing all Covid-related project awards:
 
 ```{r, fig.width=6, fig.height=4}
 library(ggplot2)
-
-message("plot 2")
 
 res %>%
   left_join(covid_response_codes, by = "covid_response") %>%

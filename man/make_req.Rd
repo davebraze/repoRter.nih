@@ -59,7 +59,6 @@ The maximum number of records that can be returned from any result set is 100,00
           varying them by the sort order on some field (and taking care to avoid or remove overlap).
           See the \code{sort_field} and \code{sort_order} arguments.}
 }
-\cr
 \code{criteria} must be specified as a list and may include any of the following (all optional) top level elements:
 \itemize{
   \item{\code{use_relevance}: logical(1); if TRUE (default), it will sort the most closely matching records per the search

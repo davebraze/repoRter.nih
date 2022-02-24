@@ -33,9 +33,11 @@ Suggests:
     ggplot2,
     ggrepel,
     knitr,
+    tinytex,
     rmarkdown,
     scales,
-    tufte
+    tufte,
+    tools
 VignetteBuilder: 
     knitr
 Encoding: UTF-8

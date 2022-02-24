@@ -35,7 +35,6 @@
 #'           varying them by the sort order on some field (and taking care to avoid or remove overlap).
 #'           See the \code{sort_field} and \code{sort_order} arguments.}
 #' }
-#' \cr
 #' \code{criteria} must be specified as a list and may include any of the following (all optional) top level elements:
 #' \itemize{
 #'   \item{\code{use_relevance}: logical(1); if TRUE (default), it will sort the most closely matching records per the search
@@ -100,7 +99,7 @@
 #'   \item{\code{award_types: character()}; (aka Type of Application) one or more grant/application type codes numbered 1-9.
 #'         See types \href{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/type-of-applications.htm}{here}}
 #'   \item{\code{dept_types: character()}; one or more of NIH standardized department type names (e.g. "PEDIATRICS"). Valid names are provided
-#'         \href{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants}{here}}
+#'         \href{https://nexus.od.nih.gov/all/2021/04/09/how-are-schools-and-departments-assigned-to-nih-grants/}{here}}
 #'   \item{\code{cong_dists: character()}; one or more US congressional districts (e.g. "NY-20") which the project can be associated with.
 #'         See \href{https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts}{here}}
 #'   \item{\code{foa: character()}; one or more FOA (Funding Opportunity Announcements). Multiple projects may be tied to a single FOA.
@@ -455,9 +454,9 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
     discard(is.null)
   
   if (is.logical(message) & length(message) == 1 & message) {
-    message(paste0("This is your JSON payload:", "\n", the_req %>% toJSON %>% green(),
-                   "\n", "\n", "If you receive a non-200 API response, compare this formatting (boxes, braces, quotes, etc.) to the 'Complete Payload' schema provided here:\n",
-                   underline("https://api.reporter.nih.gov/?urls.primaryName=V2.0#/Search/post_v2_projects_search")))
+    message(paste0("This is your JSON payload:", "\n", the_req %>% toJSON %>% prettify() %>% green(),
+                   "\n", "If you receive a non-200 API response, compare this formatting (boxes, braces, quotes, etc.) to the 'Complete Payload' schema provided here:\n",
+                   underline("https://api.reporter.nih.gov/?urls.primaryName=V2.0#/Search/post_v2_projects_search", "\n")))
   }
   
   toJSON(the_req) %>%

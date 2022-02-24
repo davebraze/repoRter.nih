@@ -5,10 +5,11 @@
 \alias{covid_response_codes}
 \title{\code{covid_response_code} translation}
 \format{
-A \code{tibble} with 6 rows and 2 columns:
+A \code{tibble} with 6 rows and 3 columns:
 \describe{
 \item{\code{covid_response_code}}{the name for a data element when specified in the payload criteria of a request; NA indicates that this is not available as payload criteria (can not search/filter on)}
 \item{\code{funding_source}}{the name of the funding source, often some federal legislation}
+\item{\code{fund_src}}{a short name for the funding source}
 }
 }
 \usage{

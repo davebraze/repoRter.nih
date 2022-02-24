@@ -5,8 +5,7 @@
 #' @param query A valid json request formatted for the RePORTER Project API, as returned by the \code{\link{make_req}} method
 #' @param max_pages numeric(1); default: NULL; An integer specifying to only fetch (up to) the first \code{max_pages} number of pages from the result set.
 #'     Useful for testing your query/obtaining schema information. Default behavior is to fetch all pages.
-#' @param flatten_result (placeholder, non-functional) (default: FALSE) If TRUE, flatten nested dataframes and
-#'     collapse nested vectors to a single character column with elements delimited by ";"
+#' @param flatten_result (default: FALSE) If TRUE, flatten nested dataframes and collapse nested vectors to a single character column with elements delimited by a semi-colon
 #' 
 #' @return A tibble containing your result set up to 100,000 records
 #' 

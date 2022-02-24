@@ -4,3 +4,6 @@
 ^.*\.RData$
 ^data-raw$
 ^build_test\.R$
+^doc$
+^Meta$
+^cran-comments\.md$

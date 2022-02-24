@@ -12,8 +12,7 @@ get_nih_data(query, max_pages = NULL, flatten_result = FALSE)
 \item{max_pages}{numeric(1); default: NULL; An integer specifying to only fetch (up to) the first \code{max_pages} number of pages from the result set.
 Useful for testing your query/obtaining schema information. Default behavior is to fetch all pages.}
 
-\item{flatten_result}{(placeholder, non-functional) (default: FALSE) If TRUE, flatten nested dataframes and
-collapse nested vectors to a single character column with elements delimited by ";"}
+\item{flatten_result}{(default: FALSE) If TRUE, flatten nested dataframes and collapse nested vectors to a single character column with elements delimited by a semi-colon}
 }
 \value{
 A tibble containing your result set up to 100,000 records

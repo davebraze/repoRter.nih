@@ -17,7 +17,8 @@ A tibble with 43 rows and 5 columns:
       The tibble contains nested data frames and lists of variable length vectors.} 
 }
 
-Note: when \code{flatten_result = TRUE}, the original field name will prefix the names of the new flattened columns. See: \code{\link{jsonlite::flatten}}.
+Note: when \code{flatten_result = TRUE}, the original field name will prefix the names of the new flattened columns.
+See: \code{\link[jsonlite:flatten]{jsonlite:flatten}}.
 }
 \usage{
 data("nih_fields")

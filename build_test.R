@@ -13,21 +13,21 @@ devtools::test_coverage()
 
 usethis::use_build_ignore("build_test.R")
 
-library(covr) # Test Coverage for Packages
-covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))
+devtools::build_vignettes()
+devtools::build_manual()
 
-rhub::check_for_cran()
-
-#check for win-builder
-devtools::check_win_devel()
-
+# library(covr) # Test Coverage for Packages
+# covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))
 
 # Check for CRAN specific requirements using rhub and save it in the results 
 # objects
 results <- rhub::check_for_cran()
-
 # Get the summary of your results
 results$cran_summary()
+
+
+# Generate your cran-comments.md, then you copy-paste the output from the function above
+usethis::use_cran_comments()
 
 rhub::check(
   env_vars = c(
@@ -35,6 +35,13 @@ rhub::check(
     "_R_CHECK_CRAN_INCOMING_" = "true"
   )
 )
+
+Sys.setenv(R_QPDF = TRUE,
+           R_GSCMD = tools::find_gs_cmd())
+
+#check for win-builder
+devtools::check_win_devel()
+
 
 # Generate your cran-comments.md, then you copy-paste the output from the function above
 usethis::use_cran_comments()

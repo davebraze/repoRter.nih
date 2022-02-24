@@ -22,6 +22,12 @@ covid_response_codes <- tibble(covid_response = c("Reg-CV", "CV", "C3", "C4", "C
                                                   "CARES Act (Coronavirus Aid, Relief, and Economic Security Act), 2020",
                                                   "Paycheck Protection Program and Health Care Enhancement Act, 2020",
                                                   "Coronavirus Response and Relief Supplemental Appropriations Act, 2021",
-                                                  "American Rescue Plan Act of 2021" ) )
+                                                  "American Rescue Plan Act of 2021" ),
+                               fund_src = c("NIH Reg Appropriations",
+                                            "Coronav Prep n Reponse Act", 
+                                            "CARES Act",
+                                            "PPP n Health Care Enhance Act",
+                                            "Coronav Response n Relief Act",
+                                            "American Rescue Plan"))
 save(covid_response_codes, file = "data/covid_response_codes.rda")
 # load("data/covid_response_codes.RData")

@@ -6,8 +6,10 @@
 #' @param max_pages numeric(1); default: NULL; An integer specifying to only fetch (up to) the first \code{max_pages} number of pages from the result set.
 #'     Useful for testing your query/obtaining schema information. Default behavior is to fetch all pages.
 #' @param flatten_result (default: FALSE) If TRUE, flatten nested dataframes and collapse nested vectors to a single character column with elements delimited by a semi-colon
+#' @param return_meta (default: FALSE) If TRUE, will return a \code{list} containing your result set as well as the meta data - this includes a count of total projects matching
+#'     your query and can be useful for programming.
 #' 
-#' @return A tibble containing your result set up to 100,000 records
+#' @return A tibble containing your result set (API max of 10,000 records); or if \code{include_meta = TRUE}, a list containing your tibble and your metadata from the response
 #' 
 #' @details A request to the RePORTER Project API requires retrieving paginated results, combining them, and often
 #'     flattening the combined ragged data.frame to a familiar flat format which we can use in analyses. This
@@ -43,11 +45,12 @@
 #' @import magrittr
 #' @importFrom janitor "clean_names"
 #' @export
-get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
+get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE, return_meta = FALSE) {
   
   assert_that(validate(query),
               is.numeric(max_pages) | is.null(max_pages),
-              is.logical(flatten_result) )
+              is.logical(flatten_result),
+              is.logical(return_meta))
   
   endpoint <- "https://api.reporter.nih.gov/v2/projects/Search"
   query_lst <- fromJSON(query)
@@ -67,8 +70,8 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
             body = query)
     },
     error = function(msg) {
-      message(paste0("Failed unexpectedly on initial connect to API. Here is the error message from POST call:\n",
-                     red(msg)) )
+      message(paste0("Failed unexpectedly on initial connect to API. Here is the error message from POST call:",
+                     "\n", msg) %>% red() )
       stop("Exiting from get_nih_data()")
     }
   )
@@ -83,8 +86,14 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
   
   if (meta$total == 0) {
     message(green("Done - 0 records returned. Try a different search criteria."))
-    return(NA)
-  } 
+    if(return_meta) {
+      list(records = NA,
+           meta = meta) %>%
+        return()
+    } else {
+      return(NA)
+    }
+  }
   
   pages[[1]] <-  res %>%
     extract2("results")
@@ -103,20 +112,25 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
   }
   
   if (iters > 1) {
+    
+    queries <- list()
+    queries[[1]] <- query
     Sys.sleep(1)
+    
     for (i in 2:iters) {
       new_offset <- (i-1)*limit
-      query <- gsub(paste0("\"offset\":", (new_offset/limit)-i+1), paste0("\"offset\":", new_offset), query)
+      
+      queries[[i]] <- gsub(paste0("\"offset\":", new_offset-limit), paste0("\"offset\":", new_offset), queries[[i-1]])
       
       message("Retrieving results ", (i-1)*limit+1, " to ", min((i)*limit, meta$total), " of ", meta$total)
       res <- RETRY("POST",
                    url = endpoint,
                    accept("text/plain"),
                    content_type_json(),
-                   body = query)
+                   body = queries[[i]])
       
       if (res$status_code != 200) {
-        message(paste0("API request failed for page #", i, ". Skipping to next page."))
+        message(paste0("API request failed for page #", i, ". Skipping to next page.") %>% red() )
         next
       }
       
@@ -153,6 +167,12 @@ get_nih_data <- function(query, max_pages = NULL, flatten_result = FALSE) {
       }))
   }
   
-  ret %>%
-    return()
+  if (return_meta) {
+    list(records = ret,
+         meta = meta) %>%
+      return()
+  } else {
+    ret %>%
+      return()
+  }
 }

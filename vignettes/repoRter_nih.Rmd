@@ -161,7 +161,7 @@ Most of the detail (and function documentation) is around the many parameters av
 
 ## Default Request
 
-If no arguments are supplied, the default behavior of `make_req()` is to generate a request for all projects funded in `fiscal_years = lubridate::year(Sys.Date())`. Limiting requests to a single year will often be necessary due to a RePORTER restriction that a maximum of 100K records may be returned from any result set - there are currently ~2.6M projects in the database going back to fiscal year 1985.
+If no arguments are supplied, the default behavior of `make_req()` is to generate a request for all projects funded in `fiscal_years = lubridate::year(Sys.Date())`. Limiting requests to a single year may be necessary (depending on other filtering criteria used if any) due to a RePORTER restriction that a maximum of 10K records may be returned from any result set - there are currently ~2.6M projects in the database going back to fiscal year 1985, and each fiscal year tends to have 70-100K projects.
 
 ```{r}
 req <- make_req()
@@ -430,6 +430,76 @@ one_rec %>% pull(abstract_text) %>% print
 one_rec %>% pull(terms) %>% substr(1, 500) %>% print
 ```
 
+# Large Result Sets
+
+The RePORTER API provides no direct way to obtain complete result sets when searches turn up over 10,000 records. `get_nih_data()` provides the `return_meta` argument which is defaulted to `FALSE`. When set to `TRUE` and combined with a little programming, you can easily obtain full result sets well beyond the 10K limit. One approach may be the following:
+
+1. Obtain a sample from your full result set by making the query you desire and calling `get_nih_data()` with `max_pages = 1` (or some small number of pages); also set `return_meta` = TRUE in order to determine the total number of records in the full result set
+1. Calculate quantiles for the sample distribution of the `award_amount` column
+- Set the # of quantiles such that you can confidently infer that the number of records within each range from the full result set will contain <10K records
+1. Iterate over your quantiles to make separate requests, passing the endpoints of each quantile to `award$award_amount_range` criteria
+- Wait til the end to flatten results since some columns may flatten differently on smaller individual result sets creating problems with combining them
+1. Bind your list of results together
+1. Flatten the complete result set if desired
+
+Below is an implementation of the above logic:
+
+```{r, eval = FALSE}
+all_res <- list()
+for(y in 2017:2021) { ## five years to loop over, each year is ~80K records
+  ## We only need the AwardAmount for quantiles
+  req_sample <- make_req(criteria = list(fiscal_years = y),
+                         include_fields = "AwardAmount")
+  
+  ## get a sample of the result set - 1000 records should be enough
+  ## return the metadata
+  res_sample <- get_nih_data(req_sample, max_pages = 2, return_meta = TRUE)
+  
+  res_sample$meta$total %>% print ## there are 73,142 project records 
+  
+  ## deciles of award amount - each decile should contain ~7,314.2 records, approximately
+  qtiles <- res_sample$records %>% pull(award_amount) %>% quantile(na.rm = TRUE, probs = seq(.1, 1, .1))
+  
+  ## list for qtile results (full year)
+  this_res <- list()
+  ## for each qtile
+  for (i in 1:length(qtiles)) {
+    if (i == 1) {
+      award_min <- 0
+    } else {
+      award_min <- ceiling(qtiles[i-1])+.01
+    }
+    if (i == length(qtiles)) {
+      award_max <- 1e9 ## arbitrarily huge
+    } else {
+      award_max <- ceiling(qtiles[i])
+    }
+    req <- make_req(criteria = list(fiscal_years = y,
+                                    award = list(award_notice_date = "",
+                                                 award_notice_opr = "",
+                                                 award_amount_range = list(min_amount = award_min,
+                                                                           max_amount = award_max))))
+    ## result set for quantile
+    this_res[[i]] <- get_nih_data(req, flatten_result = FALSE)
+  }
+  ## list of result sets for the year
+  yr_res[[y %>% as.character()]] <- this_res
+}
+
+## shape it up
+all_res <- unlist(yr_res, recursive = FALSE) %>%
+  bind_rows() %>%
+  flatten(recursive = FALSE) %>%
+  clean_names()
+
+## pull out everything that is flat
+flat_columns <- all_res %>%
+  select_if(is.atomic)
+
+## everything that isn't
+annoying_columns <- all_res %>%
+  select_if(!is.atomic)
+```
 
 # Additional Resources
 
@@ -441,7 +511,7 @@ one_rec %>% pull(terms) %>% substr(1, 500) %>% print
 
 - Information on NIH study sections, IRGs, etc. is [here](https://public.csr.nih.gov/StudySections)
 
-- h/t to Chris whose [code on github](https://github.com/christopherBelter/nih_reporter_api) I found and served as a starting point for this work
+- h/t to Chris whose [code on github](https://github.com/christopherBelter/nih_reporter_api) was all I could find existing in R and served as a starting point for this work
 
 # Session Information
 

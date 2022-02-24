@@ -32,7 +32,7 @@ inside the calling function. Defaulted to the maximum allowed value of 500. Redu
 bandwidth/timeout issues.}
 
 \item{sort_field}{character(1); optional; use to sort the result by the specified field.
-May be useful in retrieving complete result sets above the API maximum of 100K}
+May be useful in retrieving complete result sets above the API maximum of 10K (but below 2x the max = 20K)}
 
 \item{sort_order}{character(1): optional; one of "asc" or "desc"; \code{sort_field} must be specified.}
 
@@ -47,16 +47,16 @@ A standard json (\code{jsonlite} flavor) object containing the valid JSON reques
 Easily generate a json request with correct schema to be passed to NIH RePORTER Project API
 }
 \details{
-The maximum number of records that can be returned from any result set is 100,000. Also, the maximum record index
-    in the result set that can be returned is 99,999 - corresponding to the 100,000'th record in the set. These
+The maximum number of records that can be returned from any result set is 10,000. Also, the maximum record index
+    in the result set that can be returned is 9,999 - corresponding to the 10,000'th record in the set. These
     constraints from the NIH API defy any intuition that the \code{offset} argument would be useful to return records
-    beyond this 100K limit. If you need to do this, you have two options:
+    beyond this 10K limit. If you need to do this, you have two options:
 \itemize{
     \item{You can break your request into several smaller requests to be retrieved individually. For example,
           requesting records for one fiscal year (see: \code{fiscal_years}) at a time. This should be your first path}
-    \item{If you have a result set between 100,001 and 200,000 records, you might try passing essentially the same request
+    \item{If you have a result set between 10,001 and 20,000 records, you might try passing essentially the same request
           twice, but
-          varying them by the sort order on some field (and taking care to avoid or remove overlap).
+          varying them by the sort order on some field (and taking care to avoid or remove overlapping results).
           See the \code{sort_field} and \code{sort_order} arguments.}
 }
 \code{criteria} must be specified as a list and may include any of the following (all optional) top level elements:
@@ -130,19 +130,31 @@ The maximum number of records that can be returned from any result set is 100,00
   See \href{https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/understand-funding-opportunities.htm}{here}}
   \item{\code{project_start_date}: list(2); provide a range for the project start date. Must pass as list containing the following named elements:
                \itemize{
-                   \item{\code{from_date}: date(1); }
-                   \item{\code{to_date}: date(1); }
+                   \item{\code{from_date}: character(1); }
+                   \item{\code{to_date}: character(1); }
                }
        }
   \item{\code{project_end_date: list(2)}; provide a range for the project end date - similar to \code{project_start_date}.
                \itemize{
-                   \item{\code{from_date}: date(1); }
-                   \item{\code{to_date}: date(1); }
+                   \item{\code{from_date}: character(1); }
+                   \item{\code{to_date}: character(1); }
                }
   }
   \item{\code{organization_type: character()}; one or more types of applicant organizations (e.g. "SCHOOLS OF MEDICINE"). There does not appear to be a
         documented list of valid values, but you can obtain one by pulling all records in a recent year and extracting unique values.}
-  \item{\code{award}: list(3)}: award_notice_date award_notice_opr award_amount_range(min_amount, max_amount)
+  \item{\code{award}: list(3): parameters related to the award. If you use this criteria, you must provide values for all sub-criteria
+     \itemize{
+       \item{\code{award_notice_date: character(1)}; the award notice date}
+       \item{\code{award_notice_opr: character(1)}; wish I could tell you what this is - use an empty string}
+       \item{\code{award_amount_range: list(2)}; a numeric range - if you don't want to filter by this sub-criteria (but are filtering on some other award criteria),
+             enter 0 for min and 1e9 for max
+         \itemize{
+           \item{\code{min_amount: numeric(1)}; a real number between 0 and something very large}
+           \item{\code{max_amount: numeric(1)}; a real number between 0 and something very large}
+         }
+       }
+     }
+   }
   \item{\code{exclude_subprojects: logical(1)}; default: FALSE; related to multiproject research awards, TRUE will limit results to just the parent project.}
   \item{\code{sub_project_only: logical(1)}; default: FALSE; similar to \code{exclude_subprojects}, this field will limit results to just the subprojects,
         excluding the parent.}

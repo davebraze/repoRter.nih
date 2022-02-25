@@ -101,12 +101,12 @@ p
 
 # Introduction
 
-The US National Institute of Health (NIH) received approximately \$42 billion in funding fiscal year 2022; \$31 billion (72%) of this was awarded by the NIH in the form of grant funding to hospitals, medical colleges, non-profits, businesses, and other organizations based in the U.S. and abroad.^[https://nexus.od.nih.gov/all/2021/04/21/fy-2020-by-the-numbers-extramural-investments-in-research] The NIH maintains a publicly available database called "RePORTER" to track this substantial flow of grant funding and makes it available to the public via [a web-based query interface](https://reporter.nih.gov/) as well as an API.
+The US National Institute of Health (NIH) received funding of approximately \$42 billion in fiscal year 2022; \$31 billion (72%) of this was awarded by the NIH in the form of grant funding to hospitals, medical colleges, non-profits, businesses, and other organizations based in the U.S. and abroad.^[https://nexus.od.nih.gov/all/2021/04/21/fy-2020-by-the-numbers-extramural-investments-in-research] The NIH maintains a publicly available database called "RePORTER" to track this substantial flow of grant funding and makes it available to the public via [a web-based query interface](https://reporter.nih.gov/) as well as an API.
 
 > "The NIH RePORTER APIs is designed to programmatically expose relevant scientific awards data from both NIH and non-NIH federal agencies for the consumption of project teams or external 3rd party applications to support reporting, data analysis, data integration or to satisfy other business needs as deemed pertinent." 
 >`r tufte::quote_footer('--NIH RePORTER v2 API Documentation')`
 
-This data data can have significant value for researchers, investors, industry, watchdogs/public advocates, and R users, to name a few But constructing queries and retrieving results programmatically involves some coding overhead which can be a challenge for those not familiar with RESTful APIs and JSON; it takes some effort even for those who are. The `repoRter.nih` package aims to simplify this task for the typical analyst scripting in R.
+This data can have significant value for many audiences, including researchers, investors, industry, watchdogs/public advocates, and R users. But constructing queries and retrieving results programmatically involves some coding overhead which can be a challenge for those not familiar with RESTful APIs and JSON; it takes some effort even for those who are. The `repoRter.nih` package aims to simplify this task for the typical analyst scripting in R.
 
 # Getting Started
 
@@ -122,7 +122,7 @@ The current dev version can be installed from github, on the `dev` branch:
 devtools::install_github('bikeactuary/repoRter.nih@dev')
 ```
 
-I welcome more capable R developers than myself to collaborate on improving the source code, documentation, and unit testing in this package.
+I welcome R developers more capable than myself to collaborate on improving the source code, documentation, and unit testing in this package.
 
 # Basic Workflow
 
@@ -141,7 +141,7 @@ req <- make_req(criteria =
                        covid_response = c("C4", "C5", "C6")))
 ```
 
-Sending the request and retrieving results
+Sending the request and retrieving results:
 
 ```{r, cache = TRUE}
 res <- get_nih_data(req)
@@ -170,7 +170,7 @@ Most of the detail (and function documentation) is around the many parameters av
 
 ## Default Request
 
-If no arguments are supplied, the default behavior of `make_req()` is to generate a request for all projects funded in `fiscal_years = lubridate::year(Sys.Date())`. Limiting requests to a single year may be necessary (depending on other filtering criteria used if any) due to a RePORTER restriction that a maximum of 10K records may be returned from any result set - there are currently ~2.6M projects in the database going back to fiscal year 1985, and each fiscal year tends to have 70-100K projects.
+If no arguments are supplied, the default behavior of `make_req()` is to generate a request for all projects funded in `fiscal_years = lubridate::year(Sys.Date())`. Limiting requests to a single year may be necessary (depending on other filtering criteria used, if any) due to a RePORTER restriction that a maximum of 10K records may be returned from any result set. There are currently ~2.6M projects in the database going back to fiscal year 1985, and each fiscal year tends to have 70-100K projects, so the 10K limit can be restrictive to the user wanting a broad search.
 
 ```{r}
 req <- make_req()
@@ -178,7 +178,7 @@ req <- make_req()
 
 The method prints a helpful message to the console in addition to returning the JSON. Set `message = FALSE` if you wish to suppress this message.
 
-## Limiting data retrieved
+## Limiting Data Retrieved
 
 You can limit both the width and height of the result set retrieved from the API.
 
@@ -188,9 +188,9 @@ We probably will not need to fetch every field every time. The `include_fields` 
 
 ### Records (projects)
 
-This package provides the ability to retrieve just a limited number of result pages via the `max_pages` argument. This can be useful for developing/testing your queries (and for reducing time to render package documentation). Each page has a record count equal to `limit` - so setting `max_pages = 5` with the default `limit = 500` in `make_req()` will result in up to 2,500 total records returned.
+This package provides the ability to retrieve only a limited number of result pages via the `max_pages` argument. This can be useful for developing/testing your queries (and for reducing time to render package documentation). Each page has a record count equal to `limit` - so setting `max_pages = 5` with the default `limit = 500` in `make_req()` will result in up to 2,500 total records returned.
 
-### Example 1 - limiting results and selecting fields
+### Ex. 1 - Limiting results and selecting fields
 
 ```{r}
 data("nih_fields")
@@ -211,7 +211,7 @@ res %>% glimpse(width = getOption("cli.width"))
 
 ## Some Vanilla Criteria
 
-Many criteria are passed as vectors within the `criteria` list argument. We will cover some of the most useful examples.
+Many criteria are passed as vectors within the `criteria` list argument. We will cover some of the most useful examples:
 
 ### Ex. 2 - Organization search
 
@@ -301,7 +301,7 @@ Why are there projects from more recent years than 2015? Because the `include_ac
 
 ### Ex. 3 - Coronavirus/Covid-19 research
 
-We already provided one example of this search criteria above. Let's mix it up and request all covid response projects.
+We already provided one example of this search criteria above. Let's mix it up and request all Covid response projects.
 
 ```{r, cache=TRUE}
 ## all projects funded by the Paycheck Protection Act, Coronavirus Response and Relief Act,
@@ -381,9 +381,9 @@ covid_response_codes %>% print
 
 Other criteria provide search and filtering capability on many of the nested data elements. These criteria are passed as lists and must include a value for each of the named elements within.
 
-### Example 4 - Principal Investigator/Officer name search
+### Ex. 4 - Principal Investigator/Officer name search
 
-The `pi_names` and `po_names` criteria allow the user to search for projects based on the first and last names of Principal Investigators and Principal Officers assigned. Each of these criteria must be provided as a list with 3 named character vector elements: `first_name`, `last_name`, and `any_name`. _Even if you only want to search on one of these name fields, you must provide the remaining elements as an empty string._ We will demonstrate with a search on PI name.
+The `pi_names` and `po_names` criteria allow the user to search for projects based on the first and last names of Principal Investigators and Principal Officers assigned. Each of these criteria must be provided as a list with three named character vector elements: `first_name`, `last_name`, and `any_name`. _Even if you only want to search on one of these name fields, you must provide the remaining elements as an empty string._ We will demonstrate with a search on PI name:
 
 ```{r}
 ## projects funded in 2021 where the principal investigator first name
@@ -411,7 +411,7 @@ Note that the first column in the return is a list of data frames of _variable h
 
 ### Ex. 5 - Advanced text search
 
-RePORTER allows users to search the project title, abstract, and tags for specific terms or phrases. You can access this capability with the `advanced_text_search` criteria - a named list with 3 elements.
+RePORTER allows users to search the project title, abstract, and tags for specific terms or phrases. You can access this capability with the `advanced_text_search` criteria - a named list with three elements.
 
 - `operator` may be either "and", "or", or "advanced" - and/or will specify the logical operator connecting multiple search terms. "advanced" allows the user to pass a boolean search string directly.
 - `search_field` can be any or multiple of "terms", "abstract", "projecttitle." To search all items, specify "all" or "" (a length 1 vector with an empty string).
@@ -427,7 +427,7 @@ req <- make_req(criteria =
 
 res <- get_nih_data(req, max_pages = 1)
 ```
-Let's read the searched fields for one of these records
+Let's inspect the fields we searched from one of these results:
 ```{r}
 one_rec <- res %>%
   slice(4) %>%
@@ -446,13 +446,13 @@ one_rec %>% pull(terms) %>% substr(1, 500) %>% print
 
 # Large Result Sets
 
-The RePORTER API provides no direct way to obtain complete result sets when searches turn up over 10,000 records. `get_nih_data()` provides the `return_meta` argument which is defaulted to `FALSE`. When set to `TRUE` and combined with a little programming, you can easily obtain full result sets well beyond the 10K limit. One approach may be the following:
+The RePORTER API provides no direct way to obtain complete result sets when searches yield over 10,000 records. `get_nih_data()` provides the `return_meta` argument which is defaulted to `FALSE`. When set to `TRUE` and combined with a little programming, you can easily obtain full result sets well beyond the 10K limit. One approach may be the following:
 
 1. Obtain a sample from your full result set by making the query you desire and calling `get_nih_data()` with `max_pages = 1` (or some small number of pages); also set `return_meta = TRUE` in order to determine the total number of records in the full result set
 2. Calculate quantiles for the sample distribution of the `award_amount` column
-+ Set the # of quantiles such that you can confidently infer that the number of records within each range from the full result set will contain <10K records
+    + Set the # of quantiles such that you can confidently infer that the number of records within each range from the full result set will contain <10K records
 3. Iterate over your quantiles to make separate requests, passing the endpoints of each quantile to `award$award_amount_range` criteria
-+ Wait til the end to flatten results since some columns may flatten differently on smaller individual result sets creating problems with combining them
+    + Wait until the end to flatten results since some columns may flatten differently on smaller individual result sets, creating problems combining them
 4. Bind your list of results together
 5. Flatten the complete result set if desired
 
@@ -517,14 +517,10 @@ annoying_columns <- all_res %>%
 
 # Additional Resources
 
-- In addition to this vignette and function documentation, the [RePORTER web interface](https://reporter.nih.gov/advanced-search) is another useful resource for getting familiar with available search parameters
-
-- The official API documentation is located [here](https://api.reporter.nih.gov/documents/Data%20Elements%20for%20RePORTER%20Project%20API%20v2.pdf)
-
+- The [RePORTER web interface](https://reporter.nih.gov/advanced-search) is useful for getting familiar with available search parameters
+- [The official API documentation](https://api.reporter.nih.gov/documents/Data%20Elements%20for%20RePORTER%20Project%20API%20v2.pdf)
 - ...and the homepage with further examples/documentation is [here](https://api.reporter.nih.gov/)
-
 - Information on NIH study sections, IRGs, etc. is [here](https://public.csr.nih.gov/StudySections)
-
 - h/t to Chris whose [code on github](https://github.com/christopherBelter/nih_reporter_api) was all I could find existing in R and served as a starting point for this work
 
 # Session Information

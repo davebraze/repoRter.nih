@@ -13,6 +13,10 @@ output:
 header-includes:
 - \UseRawInputEncoding
 - \usepackage{xcolor}
+- \definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+- \definecolor{cerulean}{rgb}{0.0, 0.48, 0.65}
+- \definecolor{burntorange}{rgb}{0.8, 0.33, 0.0}
+- \hypersetup{colorlinks=true,linkcolor=airforceblue,citecolor=cerulean,urlcolor=burntorange}
 - \lstset{ backgroundcolor=\color[RGB]{248,248,248}, basewidth=0.5em, basicstyle=\small\ttfamily,
   breakatwhitespace=true, breakautoindent=true, breaklines=true, captionpos=b, columns=flexible,
   commentstyle=\color[rgb]{0.56,0.35,0.01}\itshape, escapeinside={\%*}{*)}, frame=tb,
@@ -37,7 +41,7 @@ knitr::opts_chunk$set(
 options(width = 95, cli.unicode = FALSE, cli.width = 95)
 ```
 
-```{r, echo = FALSE, message = FALSE, fig.width=6, fig.height=4, fig.align='center'}
+```{r, echo = FALSE, message = FALSE, fig.width=7, fig.height=4, fig.align='center'}
 library(tibble)
 library(repoRter.nih)
 library(ggplot2)
@@ -76,12 +80,17 @@ p <- res %>%
                                "\n", percent(prop, accuracy = .01)),
                       y = ypos),
                   show.legend = FALSE,
-                  nudge_x = .8) +
+                  nudge_x = .8,
+                  size = 3, color = "grey25") +
   coord_polar(theta ="y") +
   theme_void() +
   theme(legend.position = "right",
+        legend.title = element_text(colour = "grey25"),
         legend.text = element_text(colour="blue", size=6, 
-                                   face="bold")) +
+                                   face="bold"),
+        plot.title = element_text(color = "grey25"),
+        plot.caption = element_text(size = 6)) +
+  labs(caption = "Data Source: NIH RePORTER API v2") +
   ggtitle("Legislative Source for NIH Covid Response Project Funding")
 
 rm(req, res)
@@ -324,7 +333,7 @@ unique(res$covid_response)
 
 Summarizing all Covid-related project awards:
 
-```{r, fig.width=6, fig.height=4}
+```{r, fig.width=7, fig.height=4}
 library(ggplot2)
 
 res %>%
@@ -347,12 +356,17 @@ res %>%
                                "\n", percent(prop, accuracy = .01)),
                       y = ypos),
                   show.legend = FALSE,
-                  nudge_x = .8) +
+                  nudge_x = .8,
+                  size = 3, color = "grey25") +
   coord_polar(theta ="y") +
   theme_void() +
   theme(legend.position = "right",
+        legend.title = element_text(colour = "grey25"),
         legend.text = element_text(colour="blue", size=6, 
-                                   face="bold")) +
+                                   face="bold"),
+        plot.title = element_text(color = "grey25"),
+        plot.caption = element_text(size = 6)) +
+  labs(caption = "Data Source: NIH RePORTER API v2") +
   ggtitle("Legislative Source for NIH Covid Response Project Funding")
 ```
 
@@ -434,13 +448,13 @@ one_rec %>% pull(terms) %>% substr(1, 500) %>% print
 
 The RePORTER API provides no direct way to obtain complete result sets when searches turn up over 10,000 records. `get_nih_data()` provides the `return_meta` argument which is defaulted to `FALSE`. When set to `TRUE` and combined with a little programming, you can easily obtain full result sets well beyond the 10K limit. One approach may be the following:
 
-1. Obtain a sample from your full result set by making the query you desire and calling `get_nih_data()` with `max_pages = 1` (or some small number of pages); also set `return_meta` = TRUE in order to determine the total number of records in the full result set
-1. Calculate quantiles for the sample distribution of the `award_amount` column
-- Set the # of quantiles such that you can confidently infer that the number of records within each range from the full result set will contain <10K records
-1. Iterate over your quantiles to make separate requests, passing the endpoints of each quantile to `award$award_amount_range` criteria
-- Wait til the end to flatten results since some columns may flatten differently on smaller individual result sets creating problems with combining them
-1. Bind your list of results together
-1. Flatten the complete result set if desired
+1. Obtain a sample from your full result set by making the query you desire and calling `get_nih_data()` with `max_pages = 1` (or some small number of pages); also set `return_meta = TRUE` in order to determine the total number of records in the full result set
+2. Calculate quantiles for the sample distribution of the `award_amount` column
++ Set the # of quantiles such that you can confidently infer that the number of records within each range from the full result set will contain <10K records
+3. Iterate over your quantiles to make separate requests, passing the endpoints of each quantile to `award$award_amount_range` criteria
++ Wait til the end to flatten results since some columns may flatten differently on smaller individual result sets creating problems with combining them
+4. Bind your list of results together
+5. Flatten the complete result set if desired
 
 Below is an implementation of the above logic:
 

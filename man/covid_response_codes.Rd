@@ -21,12 +21,4 @@ A \code{tibble} containing name translations between \code{covid_response_code} 
 \references{
 \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}{NIH RePORTER API Documentation}
 }
-\keyword{NIH}
-\keyword{api}
-\keyword{coronavirus}
-\keyword{covid-19}
 \keyword{datasets}
-\keyword{federal}
-\keyword{funding}
-\keyword{grant}
-\keyword{research}

@@ -182,8 +182,6 @@
 #'     is located \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}{here}
 #' }
 #' 
-#' @keywords covid-19, coronavirus, NIH, research, grant, funding, federal, api
-#' 
 #' @examples
 #' library(repoRter.nih)
 #' 

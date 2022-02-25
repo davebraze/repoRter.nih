@@ -55,3 +55,5 @@ check_tidy_description()
 check_gitignore()
 
 
+devtools::spell_check()
+devtools::release()

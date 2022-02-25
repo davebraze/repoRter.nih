@@ -252,11 +252,3 @@ req <- make_req(criteria =
                 )
 
 }
-\keyword{NIH,}
-\keyword{api}
-\keyword{coronavirus,}
-\keyword{covid-19,}
-\keyword{federal,}
-\keyword{funding,}
-\keyword{grant,}
-\keyword{research,}

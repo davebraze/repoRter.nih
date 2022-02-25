@@ -11,7 +11,7 @@ Description: Methods to easily build requests in the non-standard JSON
     schema required by the National Institute of Health (NIH)'s RePORTER
     Project API (I figured out the boxing and bracing so you don't have
     to).  Also retrieve and process results into either a ragged or
-    flattened tibble.
+    flattened \keyword{tibble}.
 License: MIT + file LICENSE
 URL: https://github.com/bikeactuary/repoRter.nih
 BugReports: https://github.com/bikeactuary/repoRter.nih/issues
@@ -37,7 +37,8 @@ Suggests:
     rmarkdown,
     scales,
     tufte,
-    tools
+    tools,
+    spelling
 VignetteBuilder: 
     knitr
 Encoding: UTF-8

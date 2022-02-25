@@ -15,5 +15,5 @@
 #' 
 #' @references \href{https://api.reporter.nih.gov/documents/Data\%20Elements\%20for\%20RePORTER\%20Project\%20API\%20v2.pdf}{NIH RePORTER API Documentation}
 #' 
-#' @keywords datasets covid-19 coronavirus NIH research grant funding federal api
+#' @keywords datasets
 "covid_response_codes"

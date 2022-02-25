@@ -12,7 +12,7 @@ get_nih_data(
 )
 }
 \arguments{
-\item{query}{A valid json request formatted for the RePORTER Project API, as returned by the \code{\link{make_req}} method}
+\item{query}{A valid JSON request formatted for the RePORTER Project API, as returned by the \code{\link{make_req}} method}
 
 \item{max_pages}{numeric(1); default: NULL; An integer specifying to only fetch (up to) the first \code{max_pages} number of pages from the result set.
 Useful for testing your query/obtaining schema information. Default behavior is to fetch all pages.}
@@ -23,10 +23,10 @@ Useful for testing your query/obtaining schema information. Default behavior is 
 your query and can be useful for programming.}
 }
 \value{
-A tibble containing your result set (API max of 10,000 records); or if \code{include_meta = TRUE}, a list containing your tibble and your metadata from the response
+A \code{tibble} containing your result set (API max of 10,000 records); or if \code{include_meta = TRUE}, a list containing your \code{tibble} and your metadata from the response
 }
 \description{
-Easily send a pre-made json request to NIH RePORTER Project API, retrieve and process the results
+Easily send a pre-made JSON request to NIH RePORTER Project API, retrieve and process the results
 }
 \details{
 A request to the RePORTER Project API requires retrieving paginated results, combining them, and often
@@ -54,11 +54,3 @@ res_flattened <- get_nih_data(req,
                               max_pages = 1)
 
 }
-\keyword{NIH,}
-\keyword{api}
-\keyword{coronavirus,}
-\keyword{covid-19,}
-\keyword{federal,}
-\keyword{funding,}
-\keyword{grant,}
-\keyword{research,}

@@ -16,6 +16,8 @@
 #'     method handles all of that for you.
 #' 
 #' @examples
+#' 
+#' \donttest{
 #' library(repoRter.nih)
 #' 
 #' ## make the usual request
@@ -34,6 +36,7 @@
 #' res_flattened <- get_nih_data(req,
 #'                               flatten_result = TRUE,
 #'                               max_pages = 1)
+#' }
 #' 
 #' @rawNamespace import(tibble, except = "has_name")
 #' @import dplyr

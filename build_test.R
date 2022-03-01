@@ -4,6 +4,8 @@
 
 devtools::document()
 devtools::check()
+devtools::check(build_args = "--compact-vignettes=both")
+
 
 usethis::use_news_md()
 usethis::use_vignette("repoRter_nih.Rmd", "repoRter.nih: a convenient R interface to the NIH RePORTER Project API")
@@ -43,6 +45,7 @@ results$cran_summary()
 # Generate your cran-comments.md, then you copy-paste the output from the function above
 usethis::use_cran_comments()
 
+devtools::check_win_devel()
 
 ## skipping this for now, may revisit later release
 # libary(goodpractice)

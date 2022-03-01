@@ -34,6 +34,8 @@ A request to the RePORTER Project API requires retrieving paginated results, com
     method handles all of that for you.
 }
 \examples{
+
+\donttest{
 library(repoRter.nih)
 
 ## make the usual request
@@ -52,5 +54,6 @@ res <- get_nih_data(req,
 res_flattened <- get_nih_data(req,
                               flatten_result = TRUE,
                               max_pages = 1)
+}
 
 }

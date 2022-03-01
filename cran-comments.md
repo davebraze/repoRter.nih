@@ -18,8 +18,7 @@
 
     > Unable to find GhostScript executable to run checks on size reduction
 
-  The largest PDF is the vignette at 375 KB, well below the CRAN limit.
-
+  The largest PDF is the vignette at 375 KB, well below the CRAN limit. I believe this NOTE is due to an issue on the build agent.
 
 ## R CMD CHECK RESULTS (via rhub::check_for_cran)
 

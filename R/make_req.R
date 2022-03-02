@@ -243,8 +243,6 @@ make_req <- function(criteria = list(fiscal_years = lubridate::year(Sys.Date()))
                      sort_order = NULL,
                      message = TRUE) {
   
-  options(width = 300)
-  
   if (is.null(criteria)) criteria <- list() 
   
   ## fill req w/ default values for these criteria to be explicit

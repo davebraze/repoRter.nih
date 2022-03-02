@@ -1,7 +1,11 @@
 ## SUBMISSION NOTES
 
 * This is a re-submission
-* Changes since last submission: added \donttest{} to a long example which generated a NOTE
+* Changes since last submission:
+  - API name, 'tibble' in single quotes in DESCRIPTION
+  - API web reference added in angle brackets in DESCRIPTION
+  - remove change of options() in make_req()
+  - reset options to original settings in vignette
 * This is a new package submission
 * There were no ERRORs or WARNINGs.
 * There is one note on spelling which is a false positive and should be ignored
@@ -37,8 +41,8 @@ For a CRAN submission we recommend that you fix all NOTEs, WARNINGs and ERRORs.
   
   Possibly misspelled words in DESCRIPTION:
     JSON (10:67)
-    RePORTER (3:31, 11:65)
-    tibble (14:24)
+    RePORTER (11:66)
+    tibble (13:75)
 
 > On windows-x86_64-devel (r-devel)
   checking sizes of PDF files under 'inst/doc' ... NOTE
@@ -49,4 +53,4 @@ For a CRAN submission we recommend that you fix all NOTEs, WARNINGs and ERRORs.
   Found the following files/directories:
     'lastMiKTeXException'
 
-0 errors v | 0 warnings v | 3 notes x
+0 errors ✓ | 0 warnings ✓ | 3 notes x

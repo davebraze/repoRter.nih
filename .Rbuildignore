@@ -5,6 +5,7 @@
 ^data-raw$
 ^build_test\.R$
 ^doc$
+^scratch$
 ^Meta$
 ^cran-comments\.md$
 ^CRAN-RELEASE$

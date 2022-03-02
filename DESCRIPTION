@@ -1,6 +1,6 @@
 Type: Package
 Package: repoRter.nih
-Title: R Interface to the NIH RePORTER Project API
+Title: R Interface to the 'NIH RePORTER Project' API
 Version: 0.1.0
 Authors@R: 
     person(given = "Michael",
@@ -8,10 +8,9 @@ Authors@R:
            role = c("cre", "aut"),
            email = "mike@bikeactuary.com")
 Description: Methods to easily build requests in the non-standard JSON
-    schema required by the National Institute of Health (NIH)'s RePORTER
-    Project API (I figured out the boxing and bracing so you don't have
-    to).  Also retrieve and process results into either a ragged or
-    flattened \keyword{tibble}.
+    schema required by the National Institute of Health (NIH)'s 'RePORTER
+    Project API' <https://api.reporter.nih.gov/#/Search/post_v2_projects_search>.
+    Also retrieve and process result sets as either a ragged or flattened 'tibble'.
 License: MIT + file LICENSE
 URL: https://github.com/bikeactuary/repoRter.nih
 BugReports: https://github.com/bikeactuary/repoRter.nih/issues

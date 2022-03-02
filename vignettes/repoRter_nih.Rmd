@@ -38,6 +38,7 @@ knitr::opts_chunk$set(
   cache.path = "cache/"
 )
 
+opts.old <- options()
 options(width = 95, cli.unicode = FALSE, cli.width = 95)
 ```
 
@@ -529,4 +530,8 @@ The version number of R and packages loaded for generating the vignette were:
 
 ```{r}
 sessionInfo()
+```
+
+```{r, include=FALSE}
+options(opts.old)
 ```
